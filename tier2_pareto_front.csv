@@ -1,0 +1,6 @@
+design_id,NUM_CH,DATA_W,ECC_LANES,CLK_GATE_EN,PDN_STRAP_PITCH_UM,peak_v_drop_mv,slack_lost_ps,die_area_um2,latency_ns,power_mw,hypervolume_stat
+pareto_01,2,32,1,1,12,28.5,37.05,30000.0,100.0,1500.0,0.842
+pareto_02,2,32,1,1,16,34.5,44.85,30000.0,100.0,1500.0,0.842
+pareto_03,4,64,2,1,8,35.0,45.5,240000.0,25.0,12000.0,0.842
+pareto_04,8,128,4,0,8,48.0,62.4,1920000.0,3.12,192000.0,0.842
+pareto_05,8,128,4,1,24,67.0,87.1,1920000.0,3.12,96000.0,0.842

@@ -1,0 +1,5 @@
+rank,proposal_id,config_base,NUM_CH,DATA_W,ECC_LANES,CLK_GATE_EN,PDN_STRAP_PITCH_UM,executed_strap_pitch_um,bo_score,method,rank_basis,legacy_bo_rank
+1,cfg_run_01,cfg_small,2,32,1,1,12,12,0.3051,heuristic_ranking_over_measured_runs,measured_ir_drop_worst_mv_ascending,1
+2,cfg_run_04,cfg_small,2,32,1,1,16,16,0.3758,heuristic_ranking_over_measured_runs,measured_ir_drop_worst_mv_ascending,4
+3,cfg_run_03,cfg_small,2,32,4,1,24,24,0.6859,heuristic_ranking_over_measured_runs,measured_ir_drop_worst_mv_ascending,3
+4,cfg_run_02,cfg_small,2,32,1,1,24,24,0.7112,heuristic_ranking_over_measured_runs,measured_ir_drop_worst_mv_ascending,2

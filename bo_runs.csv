@@ -1,0 +1,5 @@
+proposal_id,config_base,strap_pitch_um,rank
+cfg_run_01,cfg_small,12,1
+cfg_run_02,cfg_small,24,2
+cfg_run_03,cfg_small,24,3
+cfg_run_04,cfg_small,16,4

@@ -1,0 +1,7 @@
+budget,knapsack_est_ps,verified_true_ps,chosen_fixes,at_risk_threshold_ns,at_risk_mode,at_risk_path_count,provenance
+10,560.64,560.64,Clock-skew staggering,4.0004,quantile,83,VALIDATED
+20,748.73,689.9,"Vt swap (non-critical), Clock-skew staggering",4.0004,quantile,83,VALIDATED
+30,1030.4099999999999,863.49,"Vt swap (non-critical), Clock-skew staggering, Decap insertion",4.0004,quantile,83,VALIDATED
+40,1216.6799999999998,978.64,"Vt swap (non-critical), Clock-skew staggering, Strap widening",4.0004,quantile,83,VALIDATED
+50,1310.27,1026.48,"Clock-skew staggering, Strap widening, Decap insertion",4.0004,quantile,83,VALIDATED
+60,1498.36,1107.63,"Vt swap (non-critical), Clock-skew staggering, Strap widening, Decap insertion",4.0004,quantile,83,VALIDATED

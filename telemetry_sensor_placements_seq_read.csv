@@ -1,0 +1,5 @@
+sensor_id,real_x_um,real_y_um,grid_x,grid_y,marginal_risk_covered_ps,num_sensors,sensor_radius_grid_units
+TDET_PDET_S01,286.89,249.87,15,13,17323.7,4,2.5
+TDET_PDET_S02,268.38,360.93,14,19,11517.14,4,2.5
+TDET_PDET_S03,231.36,434.97,12,23,7065.29,4,2.5
+TDET_PDET_S04,342.42,323.91,18,17,6454.92,4,2.5

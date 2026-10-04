@@ -1,0 +1,2 @@
+n_paths,n_rank_changes,max_rank_shift,spearman_correlation,top_10_shifted_endpoints
+1601,1598,844,0.8594,u_host_if.done_sticky$_DFF_PN0_(844);u_host_if.reg_addr[11]$_DFFE_PN0P_(751);u_host_if.reg_addr[10]$_DFFE_PN0P_(751);u_host_if.reg_addr[9]$_DFFE_PN0P_(751);u_host_if.reg_addr[30]$_DFFE_PN0P_(751);u_host_if.reg_addr[23]$_DFFE_PN0P_(682);u_host_if.reg_addr[1]$_DFFE_PN0P_(561);u_host_if.reg_addr[2]$_DFFE_PN0P_(560);u_host_if.reg_addr[7]$_DFFE_PN0P_(559);g_chan[1].u_cdc_chr.mem[12][0]$_DFFE_PP_(541)

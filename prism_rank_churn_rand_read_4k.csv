@@ -1,0 +1,2 @@
+n_paths,n_rank_changes,max_rank_shift,spearman_correlation,top_10_shifted_endpoints
+1601,1427,283,0.9902,g_chan[0].u_cdc_chr.mem[8][22]$_DFFE_PP_(283);g_chan[0].u_cdc_chr.mem[13][22]$_DFFE_PP_(283);g_chan[0].u_cdc_chr.mem[9][22]$_DFFE_PP_(283);g_chan[1].u_cdc_chr.mem[1][24]$_DFFE_PP_(270);g_chan[1].u_cdc_chr.mem[0][24]$_DFFE_PP_(270);g_chan[1].u_cdc_chr.mem[3][24]$_DFFE_PP_(270);g_chan[0].u_cdc_chr.mem[11][30]$_DFFE_PP_(267);g_chan[0].u_cdc_chr.mem[10][30]$_DFFE_PP_(267);g_chan[0].u_cdc_chr.mem[13][30]$_DFFE_PP_(258);g_chan[0].u_cdc_chr.mem[8][30]$_DFFE_PP_(257)

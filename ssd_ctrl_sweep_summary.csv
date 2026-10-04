@@ -1,0 +1,7 @@
+run_id,config,bo_rank,pdn_strap_pitch_um,NUM_CH,DATA_W,ECC_LANES,ECC_DEGREE,FIFO_DEPTH,PIPE_STAGES,NUM_BANKS,CLK_GATE_EN,insts_pnr,die_area_um2,synth_area_um2,ir_drop_worst_mv,ir_drop_avg_mv,setup_tns_ns,hold_ws_ns,power_mw
+ssd_ctrl_cfg_mid,cfg_mid,,platform(56/30),4,64,2,12,32,3,4,1,297102,790472.0,271710.2,2.0288,0.4484,0.0,-0.0058,55.9053
+ssd_ctrl_cfg_run_01_p12,cfg_run_01,1,12,2,32,1,8,16,2,2,1,71250,197331.0,66600.0,0.3051,0.0455,0.0,0.00876,17.1476
+ssd_ctrl_cfg_run_02_p24,cfg_run_02,2,24,2,32,1,8,16,2,2,1,71250,197331.0,66600.0,0.7112,0.1744,0.0,0.01332,17.1341
+ssd_ctrl_cfg_run_03_p24,cfg_run_03,3,24,2,32,4,8,16,2,2,1,73493,197323.0,66597.4,0.6859,0.1729,0.0,0.00195,17.1169
+ssd_ctrl_cfg_run_04_p16,cfg_run_04,4,16,2,32,1,8,16,2,2,1,71251,197331.0,66600.0,0.3758,0.0775,0.0,0.01247,17.1398
+ssd_ctrl_cfg_small,cfg_small,,platform(56/30),2,32,1,8,16,2,2,1,71251,197331.0,66600.0,1.7985,0.5383,0.0,0.00906,17.1248

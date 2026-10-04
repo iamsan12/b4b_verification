@@ -1,0 +1,6 @@
+knob,main_effect_Si,total_effect_STi,rank,impact
+PDN_STRAP_PITCH_UM,0.542,0.589,1,Primary Driver (Strap Resistance)
+NUM_CH,0.285,0.312,2,High Dynamic Current Spike
+CLK_GATE_EN,0.098,0.115,3,Clock Enable Switching Reduction
+DATA_W,0.052,0.064,4,Bus Toggle Activity
+ECC_LANES,0.023,0.031,5,Logic Depth Margin

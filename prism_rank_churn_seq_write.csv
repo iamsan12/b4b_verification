@@ -1,0 +1,2 @@
+n_paths,n_rank_changes,max_rank_shift,spearman_correlation,top_10_shifted_endpoints
+1601,1426,384,0.9849,nand_dq_o[4](384);nand_dq_o[5](383);nand_dq_o[3](379);nand_dq_o[6](379);nand_dq_o[0](379);nand_dq_o[7](379);nand_cle[0](378);nand_we_n[0](377);nand_ale[0](376);nand_ce_n[0](375)

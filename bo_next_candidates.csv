@@ -1,0 +1,5 @@
+rank,candidate_id,config_base,NUM_CH,DATA_W,ECC_LANES,CLK_GATE_EN,PDN_STRAP_PITCH_UM,mu_mv,sigma_mv,lcb_score_mv,method,n_training_obs,training_note
+1,cfg_next_01,cfg_small,8,32,4,0,8,0.5897,0.5516,-0.4914,gp_lcb_unobserved_diverse,6,"Fitted on 6 measured PnR observations from ssd_ctrl_sweep_summary.csv (small training set, diverse acquisition)"
+2,cfg_next_02,cfg_small,8,32,4,0,12,0.5303,0.519,-0.4868,gp_lcb_unobserved_diverse,6,"Fitted on 6 measured PnR observations from ssd_ctrl_sweep_summary.csv (small training set, diverse acquisition)"
+3,cfg_next_03,cfg_small,8,32,2,0,8,0.5667,0.5312,-0.4744,gp_lcb_unobserved_diverse,6,"Fitted on 6 measured PnR observations from ssd_ctrl_sweep_summary.csv (small training set, diverse acquisition)"
+4,cfg_next_04,cfg_small,8,32,1,0,8,0.565,0.5283,-0.4706,gp_lcb_unobserved_diverse,6,"Fitted on 6 measured PnR observations from ssd_ctrl_sweep_summary.csv (small training set, diverse acquisition)"

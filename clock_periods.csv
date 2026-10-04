@@ -1,0 +1,4 @@
+clock_domain,period_ns
+clk_core,5.0
+clk_host,10.0
+clk_nand,20.0
