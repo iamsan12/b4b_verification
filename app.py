@@ -61,7 +61,7 @@ st.markdown("""
     .stMetric {
         background: rgba(13, 20, 36, 0.75) !important;
         border: 1px solid rgba(0, 229, 255, 0.2) !important;
-        padding: 14px 18px !important;
+        padding: 12px 14px !important;
         border-radius: 16px !important;
         backdrop-filter: blur(16px) !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
@@ -72,14 +72,15 @@ st.markdown("""
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(0, 229, 255, 0.15) !important;
     }
-    div[data-testid="stMetricValue"] {
+    div[data-testid="stMetricValue"], div[data-testid="stMetricValue"] * {
         font-family: 'JetBrains Mono', monospace !important;
-        font-size: 1.5rem !important;
+        font-size: 1.25rem !important;
         font-weight: 700 !important;
         color: #F8FAFC !important;
         letter-spacing: -0.5px !important;
         white-space: nowrap !important;
         overflow: visible !important;
+        text-overflow: clip !important;
     }
     div[data-testid="stMetricLabel"] {
         font-size: 0.8rem !important;
