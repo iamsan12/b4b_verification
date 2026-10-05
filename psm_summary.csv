@@ -1,0 +1,17 @@
+design_id,net,worst_mv,avg_mv
+orfs_gcd,VDD,10.2915,5.0234
+orfs_gcd,VSS,7.5096,4.1236
+orfs_ibex,VDD,13.0351,2.2455
+orfs_ibex,VSS,7.7693,2.0506
+orfs_ssd_ctrl_cfg_small,VDD,1.7985,0.5383
+orfs_ssd_ctrl_cfg_small,VSS,2.5622,0.5694
+orfs_ssd_ctrl_cfg_mid,VDD,2.0288,0.4484
+orfs_ssd_ctrl_cfg_mid,VSS,1.767,0.4557
+orfs_ssd_ctrl_cfg_run_01_p12,VDD,0.3051,0.0455
+orfs_ssd_ctrl_cfg_run_01_p12,VSS,0.258,0.0444
+orfs_ssd_ctrl_cfg_run_02_p24,VDD,0.7112,0.1744
+orfs_ssd_ctrl_cfg_run_02_p24,VSS,0.6724,0.1691
+orfs_ssd_ctrl_cfg_run_03_p24,VDD,0.6859,0.1729
+orfs_ssd_ctrl_cfg_run_03_p24,VSS,0.7566,0.1703
+orfs_ssd_ctrl_cfg_run_04_p16,VDD,0.3758,0.0775
+orfs_ssd_ctrl_cfg_run_04_p16,VSS,0.3466,0.0759

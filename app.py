@@ -427,8 +427,7 @@ with col1:
     st.metric(
         label="Path Records",
         value=f"{rec_count:,}",
-        delta="Unique",
-        help="Timing Path Records (1601 Unique Endpoints)"
+        delta="Unique"
     )
 
 with col2:
@@ -436,31 +435,33 @@ with col2:
         label="Violations",
         value=f"{failing_paths}",
         delta=viol_delta_text,
-        delta_color=viol_color,
-        help="Critical Violating Paths (Setup Failure!)"
+        delta_color=viol_color
     )
 
 with col3:
     st.metric(
         label="Max Droop",
-        value=format_ps(max_penalty_ps),
-        help="Max Per-Path Droop Penalty"
+        value=format_ps(max_penalty_ps)
     )
 
 with col4:
     st.metric(
         label="Slack Recovered",
         value=format_ps(max_benefit_ps),
-        delta="6 fixes",
-        help="Total Slack Recovered Across Budget (6 Candidate Fixes)"
+        delta="6 fixes"
     )
 
 with col5:
     st.metric(
         label="Top-5% Hit Rate",
         value=f"{top5_hit_rate_pct}%",
-        delta="MAE/R²",
-        help="Role B ML Model Top-5% Hit Rate (MAE: 0.981 mV, R²: 0.9889)"
+        delta="MAE/R²"
+    )
+
+if sc_prefix == "gc_compact_stress":
+    st.info(
+        "💡 **Stress Burst Scenario Note**: Stress Burst scenario intentionally applies peak transient current. "
+        "Violations here are PRISM droop-aware effective-slack violations after predicted droop is converted into timing penalty, not raw baseline STA failures."
     )
 
 if is_dup_scenario:
@@ -496,6 +497,9 @@ with tab1:
     st.subheader("1. Effective Slack Risk Ranking")
     st.write(f"Displaying risk evaluation for active scenario: **`{sc_raw_option}`**")
     
+    if sc_prefix == "gc_compact_stress":
+        st.info("💡 This scenario demonstrates PRISM’s ability to expose burst-induced power-integrity timing risk.")
+
     if failing_paths > 0:
         st.error(f"🚨 **STRESS SCENARIO REVEAL ACTIVE — {sc_raw_option}**: Peak transient current surge causes severe voltage droop. **{failing_paths} timing paths violate setup slack (`effective_slack_ns < 0`)!**")
     
