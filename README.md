@@ -1,234 +1,137 @@
-# PRISM (Power-Grid Risk & IR-Drop Simulation & Mitigation) - Role C Architecture & Pipeline
+# PRISM - Power-Integrity Risk & Slack Mitigation (Role C)
 
-Welcome to the **PRISM Role C** codebase and submission package. This repository contains the complete end-to-end timing risk modeling, Bayesian Optimization Design Space Exploration (DSE), submodular telemetry sensor placement engine, and interactive Streamlit analytics dashboard for SSD Controller SoC PnR (Place & Route) designs.
+PRISM combines Role A's physical-design timing data, Role B's ML-predicted IR-drop, and measured PnR sweeps into a droop-aware timing-risk engine, a mitigation optimizer, a design-space-exploration (DSE) module, a telemetry sensor-placement engine, and a Streamlit dashboard for the SSD controller design.
 
----
-
-## 📌 Executive Summary & Architecture Overview
-
-PRISM Role C bridges physical design implementation (PnR) and timing closure by combining:
-1. **Person A's Timing Critical Paths** (`paths.csv`): Real timing endpoint coordinates, slack values, logic depths, and clock period constraints.
-2. **Person B's ML Voltage Prediction Engine** (`predictions.csv`): Predicted transient IR-drop voltage drops ($\Delta V_{\text{droop}}$) across a $24 \times 24$ spatial grid (576 tiles covering a $450\ \mu\text{m} \times 400\ \mu\text{m}$ silicon floorplan).
-3. **Physical Cell Instances** (`instances.csv`): Real silicon placement coordinates ($x, y$ in $\mu\text{m}$) for cell instances.
-4. **PnR Design Sweeps** (`ssd_ctrl_sweep_summary.csv`): Measured Place & Route runs across architectural knobs (`NUM_CH`, `DATA_W`, `ECC_LANES`, `CLK_GATE_EN`, `PDN_STRAP_PITCH_UM`).
-
-```
- +------------------------+     +----------------------------+     +--------------------------+
- |   Person A: paths.csv  |     | Person B: predictions.csv  |     | Physical: instances.csv  |
- | (Timing Paths & Slack) |     |  (576-Tile IR Drop Grid)   |     |  (Cell Placements in um) |
- +-----------+------------+     +-------------+--------------+     +------------+-------------+
-             |                                |                                 |
-             +------------------------+-------+---------------------------------+
-                                      |
-                                      v
-                        +---------------------------+
-                        |   prism_risk_engine.py    |
-                        | (Zero-Hardcoding Engine)  |
-                        +-------------+-------------+
-                                      |
-       +------------------------------+------------------------------+
-       |                                                             |
-       v                                                             v
-+-------------------------------+                     +-------------------------------+
-|     dse_tier3_bo.py           |                     | telemetry_sensor_placement.py |
-| (Gaussian Process BO + LCB)   |                     |  (Greedy Submodular K-Sensor) |
-| (Normalized Spacing d >= 0.25)|                     |  (101-Tile Radius Coverage)   |
-+--------------+----------------+                     +---------------+---------------+
-               |                                                     |
-               +------------------------------+----------------------+
-                                              |
-                                              v
-                              +-------------------------------+
-                              |            app.py             |
-                              |  (Streamlit Interactive GUI)  |
-                              +-------------------------------+
-```
+This README reflects the **final Role A signoff data** integration.
 
 ---
 
-## 🛠️ Key Components & File Directory
+## Architecture
 
-| File / Module | Description |
+```
+ paths.csv (Role A)      predictions.csv (Role B)      instances.csv
+ timing paths + slack    24x24 IR-drop (Volts)         cell placements (um)
+        |                        |                           |
+        +------------------------+---------------------------+
+                                 v
+                      prism_risk_engine.py
+        (droop -> delay penalty -> effective slack, per scenario)
+                                 |
+        +------------------------+-------------------------+
+        v                        v                         v
+  mitigation catalog     telemetry_sensor_placement.py   dse_tier3_bo.py
+  + Pareto (per scenario) (greedy submodular, K=4)       (GP + LCB)
+        \                        |                         /
+         +-----------------------+------------------------+
+                                 v
+                              app.py (Streamlit)
+```
+
+Measured Role A power-grid data in `measured_droop/` (12 rail/VDD CSVs, one pair per measured PnR run) feeds the droop map used by the risk engine. Scenario weights come from `activity.csv` (`mission_weight`).
+
+---
+
+## Final Role A signoff inputs
+
+### `paths.csv`
+Columns: `path_id, endpoint, clock_domain, slack_ns, delay_ns, inst_ids, check_type`
+
+- 1,601 timing path records (endpoint names are **not** unique: 103 repeated endpoint names, so the dashboard calls them *path records*).
+- `check_type` distribution: 1,200 `setup`, 400 `recovery`, 1 `clock_gating`.
+- Baseline slack range: 2.10 ns to 11.92 ns.
+- `check_type` is read cleanly by the engine and is carried through as a path attribute; no formulas depend on it.
+- `compare_paths.py` compares an older `paths.csv` against the new one (endpoint overlap, slack differences).
+
+### Other final inputs
+`ssd_ctrl_sweep_summary.csv` (6 measured PnR runs), `psm_summary.csv`, `synth_stats.csv`, `measured_droop/`.
+
+### Design constants (`design_stats.csv`)
+Die: **444.22 um x 444.22 um**, VDD = 1.1 V, clock period 5.0 ns, 24 x 24 tile grid (about 18.5 um per tile).
+
+---
+
+## Scenarios
+
+Eight selectable views, each backed by its own set of generated CSVs (`prism_ranked_risk_<scenario>.csv`, `prism_measured_mitigation_catalog_<scenario>.csv`, `prism_mitigation_pareto_front_<scenario>.csv`, `prism_rank_churn_<scenario>.csv`, `prism_chip_risk_grid_<scenario>.csv`, `telemetry_sensor_placements_<scenario>.csv`):
+
+| View | Notes |
 | :--- | :--- |
-| **`app.py`** | Main interactive Streamlit dashboard. Displays spatial heatmaps, BO candidate explorations, sensor placements, and timing risk rankings. |
-| **`prism_risk_engine.py`** | Core risk engine. Aggregates tile-level IR drop across 14 measured designs & 6 workload scenarios (`seq_read`, `seq_write`, `rand_read_4k`, `gc_compact`, `ecc_recover`), computing exact path droop delay penalties ($13.1\text{ ps}$ – $37.4\text{ ps}$). |
-| **`dse_tier3_bo.py`** | Tier 3 Bayesian Optimization engine. Fits a Gaussian Process Regressor on measured PnR data and computes Lower Confidence Bound ($LCB = \mu - 1.96\sigma$). Implements **greedy normalized spatial rejection** ($d \ge 0.25$) to enforce candidate diversity. |
-| **`telemetry_sensor_placement.py`** | Greedy submodular sensor placement engine ($K=4$ sensors). Maximizes cumulative spatial risk coverage across circular sensing radii ($R=2.5$ grid units $\approx 46.3\ \mu\text{m}$, 101 tiles per sensor). |
-| **`verify_prism.py`** | Part 6 Verification Test Suite. Runs 6 automated checks ensuring zero hardcoded literals, data integrity, and correct engine execution. |
-| **`bo_next_candidates.csv`** | 4 proposed unobserved candidates generated by Tier 3 BO with guaranteed normalized spacing. |
-| **`bo_proposals.csv`** | Ranked measured PnR runs based on measured worst IR drop. |
-| **`telemetry_sensor_placements.csv`** | Physical silicon coordinates ($x, y$ in $\mu\text{m}$) and marginal risk covered (in ps) for the $K=4$ placed telemetry sensors. |
-| **`prism_ranked_risk_output.csv`** | Path-level timing risk rankings and mitigation recommendations. |
+| Baseline Default | Files without a scenario suffix. Currently identical to `idle`. |
+| `idle`, `seq_read`, `seq_write`, `rand_read_4k`, `gc_compact`, `ecc_recover` | Real workload scenarios with mission weights from `activity.csv`. |
+| `gc_compact_stress` | **Stress Burst** scenario (see below). |
+
+Final generated values (from the current CSVs):
+
+| Scenario | Violations | Max Droop Penalty |
+| :--- | :---: | :---: |
+| Baseline Default / `idle` | 0 | 11.6 ps |
+| `seq_read` | 0 | 180.7 ps |
+| `seq_write` | 0 | 239.2 ps |
+| `rand_read_4k` | 0 | 170.0 ps |
+| `gc_compact` | 0 | 206.7 ps |
+| `ecc_recover` | 0 | 132.4 ps |
+| `gc_compact_stress` | **347** | 13,243.9 ps |
+
+### Stress scenario (`gc_compact_stress`)
+The stress scenario intentionally applies peak transient current. Its **347 violations are PRISM droop-aware effective-slack violations** (`effective_slack_ns < 0`, where `effective_slack_ns = slack_ns - droop_penalty_ns`) after predicted droop is converted into a timing penalty. They are **not raw baseline STA failures**: the baseline `paths.csv` has no negative slack. The stress scenario has no mission weight and is excluded from the N5 expected-risk aggregation. It demonstrates PRISM's ability to expose burst-induced power-integrity timing risk and should be read as a synthetic stress test, not a predicted field failure rate.
 
 ---
 
-## 🔬 In-Depth Engineering & Technical Solutions
+## What is scenario-dependent vs global
 
-### 1. Zero-Hardcoding & Empirical Integrity Guarantee
-- **Previous Bottleneck:** Legacy scripts contained artificial fallback multipliers (e.g., hardcoded `% 576` indexing, fixed `2.2` multipliers, or static `39.91` values).
-- **Resolution:** Replaced all hardcoded heuristics with 100% empirical data extraction. Paths are mapped to tiles using exact spatial bounds ($X \in [0, 450]\ \mu\text{m}$, $Y \in [0, 400]\ \mu\text{m}$ mapped to $24 \times 24$ tiles).
-- **Verification:** Verified automatically by `verify_prism.py` Check 1 & Check 5 (zero forbidden pattern matches).
-
----
-
-### 2. Tier 3 BO Candidate Diversity Fix
-- **Problem Statement:** On small training sets (6 PnR runs from `ssd_ctrl_sweep_summary.csv`), Gaussian Process surrogate uncertainty ($1.96\sigma \approx 1.08\text{ mV}$) peaks in unobserved regions (e.g., `NUM_CH=8`). Raw LCB acquisition proposed 4 near-identical configurations differing only by tiny incremental steps in `PDN_STRAP_PITCH_UM` (8, 12, 16, 20 $\mu\text{m}$), wasting valuable PnR run budget.
-- **Solution:** Implemented a **Greedy Spatial Spacing Constraint** in 5D normalized knob space $[0, 1]^5$. When selecting top candidates, candidate $k$ is selected only if its Euclidean distance to all previously selected candidates satisfies:
-  $$d_{\text{norm}}(\mathbf{x}_i, \mathbf{x}_j) \ge 0.25$$
-
-#### Pairwise Distance Verification Output:
-The resulting 4 candidates in `bo_next_candidates.csv` demonstrate true architectural diversity:
-
-| Candidate ID | `NUM_CH` | `DATA_W` | `ECC_LANES` | `CLK_GATE_EN` | `PDN_STRAP_PITCH_UM` | LCB Score (mV) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| `cfg_next_01` | 8 | 32 | 4 | 0 | 8 | -0.4914 |
-| `cfg_next_02` | 8 | 32 | 4 | 0 | 12 | -0.4868 |
-| `cfg_next_03` | 8 | 32 | 2 | 0 | 8 | -0.4744 |
-| `cfg_next_04` | 8 | 32 | 1 | 0 | 8 | -0.4706 |
-
-- $d(1, 2) = \mathbf{0.2500}$ *(Pitch shift: 8 $\mu\text{m} \rightarrow 12\ \mu\text{m}$)*
-- $d(1, 3) = \mathbf{0.6667}$ *(ECC shift: 4 lanes $\rightarrow 2$ lanes)*
-- $d(1, 4) = \mathbf{1.0000}$ *(ECC shift: 4 lanes $\rightarrow 1$ lane)*
-- $d(2, 3) = \mathbf{0.7120}$ *(Pitch & ECC shift)*
-- $d(2, 4) = \mathbf{1.0308}$ *(Pitch & ECC shift)*
-- $d(3, 4) = \mathbf{0.3333}$ *(ECC shift: 2 lanes $\rightarrow 1$ lane)*
+| Item | Scope |
+| :--- | :--- |
+| Violations, Max Droop, Slack Recovered, risk ranking, rank churn, mitigation catalog + Pareto, risk grid, telemetry sensor placement | **Scenario-dependent** (loaded from per-scenario CSVs) |
+| Path Records (1,601) | Global (same path set for all scenarios) |
+| N5 scenario weight vs expected-risk chart | Computed at runtime from `activity.csv` weights and the per-scenario ranked-risk CSVs, cross-checked against `prism_scenario_expected_risk.csv` |
+| DSE (Tier 1 Sobol, Tier 2 NSGA-II, Tier 3 BO) | Global / workload-independent |
+| Accuracy-tab model metrics (Top-5% hit rate, MAE, R^2, ablation) | Static Role B model-level figures supplied as constants in `app.py`; not recomputed here |
 
 ---
 
-### 3. Telemetry `marginal_risk_covered_ps` Scale Analysis
-- **Question Addressed:** Why do sensor coverage numbers (~292 – 1089 ps) appear higher than individual timing path delay penalties (13 – 37 ps)?
-- **Mathematical Explanation:** This is **not** a unit mismatch.
-  - Individual path droop penalties measure single-path delay degradation ($13.1\text{ ps}$ – $37.4\text{ ps}$).
-  - A single tile aggregates all paths in its physical area (e.g., Tile (13, 15) contains $474.94\text{ ps}$ total path risk).
-  - Each telemetry sensor has a physical sensing radius of $R = 2.5$ grid units ($\approx 46.3\ \mu\text{m}$), covering **101 spatial tiles**.
-  - `marginal_risk_covered_ps` represents the **cumulative spatial sum of path risks** across all 101 covered tiles:
-    $$\text{marginal\_risk\_covered\_ps} = \sum_{t \in \text{covered\_tiles}} \text{Risk}_{\text{tile}, t} \quad [\text{picoseconds}]$$
+## Telemetry sensor placement
 
-#### Sensor 1 (Grid (15, 13), $x=286.89\ \mu\text{m}, y=249.87\ \mu\text{m}$) Tile Breakdown:
-- Tile (13, 15): $474.94\text{ ps}$
-- Tile (13, 16): $140.23\text{ ps}$
-- Tile (14, 15): $108.97\text{ ps}$
-- Tile (14, 14): $74.31\text{ ps}$
-- Tile (15, 14): $73.68\text{ ps}$
-- Tile (15, 13) [Center]: $55.20\text{ ps}$
-- Tile (14, 13): $47.45\text{ ps}$
-- *+ 94 surrounding tiles = **Exact Sum: $1088.96\text{ ps}$***
+`telemetry_sensor_placement.py` places K=4 sensors greedily to maximize covered spatial risk (submodular, (1 - 1/e) approximation guarantee for the greedy algorithm). Sensing radius is 2.5 grid units (about 46 um, 101 tiles).
+
+`telemetry_sensor_placements[_<scenario>].csv` columns: `sensor_id, real_x_um, real_y_um, grid_x, grid_y, marginal_risk_covered_ps, num_sensors, sensor_radius_grid_units`.
+
+Baseline Default result: 4 sensors cover 2,897.5 ps of 6,020.3 ps total unmitigated risk (48.1%); sensor 1 at (286.89 um, 249.87 um) covers 1,434.2 ps. `marginal_risk_covered_ps` is a spatial sum over all tiles in a sensor's radius, so it is larger than any single-path penalty (this is not a unit mismatch).
 
 ---
 
-## 📊 Data Schemas
+## Tier 3 BO (DSE)
 
-### Input Schemas
-1. **`paths.csv`**: `path_id`, `startpoint`, `endpoint`, `start_x_um`, `start_y_um`, `end_x_um`, `end_y_um`, `slack_ps`, `logic_depth`, `clock_period_ps`.
-2. **`predictions.csv`**: `design_id`, `workload_scenario`, `tile_x`, `tile_y`, `predicted_ir_drop_mv`.
-3. **`instances.csv`**: `instance_name`, `cell_type`, `x_um`, `y_um`.
-4. **`ssd_ctrl_sweep_summary.csv`**: PnR sweep observations containing design knobs (`NUM_CH`, `DATA_W`, `ECC_LANES`, `CLK_GATE_EN`, `PDN_STRAP_PITCH_UM`) and measured `worst_ir_drop_mv`.
-
-### Output Schemas
-1. **`bo_next_candidates.csv`**:
-   - `candidate_id`: Proposal ID (`cfg_next_01` to `cfg_next_04`).
-   - `NUM_CH`, `DATA_W`, `ECC_LANES`, `CLK_GATE_EN`, `PDN_STRAP_PITCH_UM`: Proposed knob configuration.
-   - `mu_mv`: GP mean predicted IR drop (mV).
-   - `sigma_mv`: GP uncertainty standard deviation (mV).
-   - `lcb_score_mv`: Lower Confidence Bound score ($\mu - 1.96\sigma$).
-   - `method`: `gp_lcb_unobserved_diverse`.
-2. **`telemetry_sensor_placements.csv`**:
-   - `sensor_id`: Sensor index (1 to $K$).
-   - `grid_x`, `grid_y`: Tile grid coordinate $[0..23]$.
-   - `x_um`, `y_um`: Physical silicon coordinate in $\mu\text{m}$.
-   - `marginal_risk_covered_ps`: Newly monitored spatial risk sum (ps).
-   - `total_risk_covered_ps`: Cumulative monitored risk (ps).
-   - `coverage_pct`: Cumulative percentage of unmitigated chip risk monitored.
+`dse_tier3_bo.py` fits a Gaussian Process on the 6 measured PnR runs in `ssd_ctrl_sweep_summary.csv` and proposes unobserved candidates by LCB (`mu - 1.96 sigma`) with greedy normalized spacing `d >= 0.25`. Outputs: `bo_proposals.csv` (measured runs ranked by measured worst IR drop) and `bo_next_candidates.csv` (4 GP-LCB proposals). With only 6 training observations the surrogate is a small-sample model; treat proposals as suggestions for the next PnR runs.
 
 ---
 
-## ⚡ How to Run & Verify
+## Dashboard (`app.py`)
 
-### Prerequisites & Dependencies
-Ensure Python 3.9+ is installed along with the required libraries:
+Tabs: Risk, Mitigation, DSE, Telemetry, Accuracy. Notes:
+- Accuracy tab shows the PRISM spatial timing-risk grid in **ps** for the selected scenario. It is not a ground-truth PDNSim mV map, and no quantile-interval map is shown.
+- Provenance notes (Baseline/idle reuse, scenario consistency) are informational.
+
+---
+
+## Legacy / non-runtime files
+
+These files are kept for history only. They are **not** loaded by `app.py` or by the pipeline scripts:
+- `paths_LEGACY_unvalidated.csv`
+- `risk_engine_results.csv`
+- `risk_engine_DEPRECATED.py`
+
+---
+
+## How to run
+
 ```bash
 pip install numpy pandas scipy scikit-learn streamlit plotly
+python prism_risk_engine.py          # regenerates risk, mitigation, Pareto, churn, grids, expected risk
+python telemetry_sensor_placement.py # regenerates telemetry placements
+python dse_tier3_bo.py               # regenerates BO outputs
+python verify_prism.py               # 6 verification checks
+python audit.py                      # data-leakage audit (5 checks)
+python -m streamlit run app.py       # dashboard at http://localhost:8501
 ```
 
----
-
-### 1. Launch the Interactive Dashboard
-Run the Streamlit app locally:
-```bash
-python -m streamlit run app.py
-```
-Open your browser at **`http://localhost:8501`**.
-
----
-
-### 2. Run the Full Automated Verification Test Suite
-Execute `verify_prism.py` to run all 6 validation checks:
-```bash
-python verify_prism.py
-```
-
-**Expected Output:**
-```text
-==========================================================
-       PRISM PIPELINE VERIFICATION SUITE (PART 6)        
-==========================================================
-
-[CHECK 1] Code pattern grep checks... ALL PASSED!
-[CHECK 2] Executing prism_risk_engine.py... PASSED!
-[CHECK 3] Executing telemetry_sensor_placement.py... PASSED!
-[CHECK 4] Executing dse_tier3_bo.py... PASSED!
-[CHECK 5] app.py numeric literal check... PASSED!
-[CHECK 6] Duplicate engine file check... PASSED!
-
-==========================================================
-  ALL PRISM VERIFICATION CHECKS PASSED SUCCESSFULLY!  
-==========================================================
-```
-
----
-
-### 3. Run Individual Pipeline Modules Manually
-- **Re-run Bayesian Optimization**:
-  ```bash
-  python dse_tier3_bo.py
-  ```
-- **Re-run Telemetry Sensor Placement**:
-  ```bash
-  python telemetry_sensor_placement.py
-  ```
-- **Re-run Risk Engine Data Processing**:
-  ```bash
-  python prism_risk_engine.py
-  ```
-
----
-
-## 📦 Deliverable Package Structure
-
-The submission archive `PRISM_RoleC_Submission.zip` contains:
-```text
-PRISM_RoleC_Submission/
-├── README.md                           <-- This documentation file
-├── app.py                              <-- Interactive Streamlit dashboard
-├── prism_risk_engine.py                <-- Risk computation engine
-├── dse_tier3_bo.py                     <-- Diverse BO acquisition engine
-├── telemetry_sensor_placement.py       <-- Submodular sensor placement engine
-├── verify_prism.py                     <-- Part 6 verification script
-├── paths.csv                           <-- Endpoint timing data
-├── predictions.csv                     <-- ML IR-drop predictions
-├── instances.csv                       <-- Silicon cell placements
-├── ssd_ctrl_sweep_summary.csv          <-- PnR sweep summary
-├── bo_next_candidates.csv              <-- Diverse BO proposals
-├── bo_proposals.csv                    <-- Measured baseline proposals
-├── telemetry_sensor_placements.csv     <-- Monitored sensor placement CSV
-└── prism_ranked_risk_output.csv        <-- Path risk rankings
-```
-
----
-
-## 🏆 Summary of Guarantees
-
-1. **Empirical Integrity**: Zero hardcoded fallbacks or modulo math.
-2. **Optimized Exploration**: BO candidate proposal spacing guaranteed ($d \ge 0.25$) to avoid wasteful redundant PnR runs.
-3. **Submodular Sensor Placement**: Telemetry placement satisfies $(1 - 1/e) \approx 63.2\%$ approximation guarantee for $K$-sensor coverage optimization.
-4. **Reproducibility**: All outputs pass 6/6 verification steps automatically.
+`compare_paths.py <old_paths.csv> <new_paths.csv>` is an optional utility for comparing two `paths.csv` versions.

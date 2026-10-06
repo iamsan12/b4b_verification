@@ -428,7 +428,7 @@ with col1:
     st.metric(
         label="Path Records",
         value=f"{rec_count:,}",
-        delta="Unique"
+        delta="paths"
     )
 
 with col2:
@@ -562,22 +562,66 @@ with tab1:
         col_n5_1, col_n5_2 = st.columns([1, 1])
         with col_n5_1:
             st.markdown("#### Operational Scenario Weight & Risk Contribution")
-            df_sc_breakdown = pd.DataFrame({
-                'Scenario': ['idle', 'seq_read', 'seq_write', 'rand_read_4k', 'gc_compact', 'ecc_recover'],
-                'Mission Weight (%)': [30.0, 25.0, 15.0, 15.0, 10.0, 5.0],
-                'Expected Risk Contribution (%)': [1.4, 19.1, 25.1, 11.0, 36.8, 6.6]
-            })
-            fig_n5 = px.bar(
-                df_sc_breakdown,
-                x='Scenario',
-                y=['Mission Weight (%)', 'Expected Risk Contribution (%)'],
-                barmode='group',
-                title='N5 Runtime Weight vs Expected Risk',
-                template='plotly_dark'
-            )
-            fig_n5.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=350)
-            st.plotly_chart(fig_n5, use_container_width=True)
-            st.caption("💡 **Key Finding**: `gc_compact` represents only **10% of runtime**, but accounts for **36.8% of total expected timing risk** due to heavy memory-controller cell activity.")
+            df_sc_breakdown = None
+            n5_check_note = ""
+            df_act_n5 = load_csv_safe('activity.csv')
+            if df_act_n5 is not None and {'scenario', 'mission_weight'}.issubset(df_act_n5.columns):
+                n5_weights = df_act_n5.groupby('scenario')['mission_weight'].first()
+                n5_weights = n5_weights[n5_weights > 0]
+                n5_total_w = float(n5_weights.sum())
+                n5_rows = []
+                for n5_sc, n5_w in n5_weights.items():
+                    n5_df_sc = load_csv_safe(f'prism_ranked_risk_{n5_sc}.csv')
+                    if n5_df_sc is None or 'droop_penalty_ns' not in n5_df_sc.columns:
+                        n5_rows = []
+                        break
+                    n5_norm_w = float(n5_w) / n5_total_w
+                    n5_rows.append({
+                        'Scenario': n5_sc,
+                        'Mission Weight (%)': n5_norm_w * 100.0,
+                        'contrib_ns': n5_norm_w * float(n5_df_sc['droop_penalty_ns'].sum())
+                    })
+                if n5_rows:
+                    df_sc_breakdown = pd.DataFrame(n5_rows)
+                    n5_total_contrib = float(df_sc_breakdown['contrib_ns'].sum())
+                    if n5_total_contrib > 0:
+                        df_sc_breakdown['Expected Risk Contribution (%)'] = df_sc_breakdown['contrib_ns'] / n5_total_contrib * 100.0
+                        if df_expected is not None and 'expected_penalty_ns' in df_expected.columns:
+                            n5_csv_total = float(df_expected['expected_penalty_ns'].sum())
+                            n5_rel_err = abs(n5_csv_total - n5_total_contrib) / max(n5_csv_total, 1e-12)
+                            n5_check_note = (
+                                f"Cross-check vs `prism_scenario_expected_risk.csv`: total expected penalty "
+                                f"{n5_csv_total:.4f} ns (relative difference {n5_rel_err:.2e})."
+                            )
+                    else:
+                        df_sc_breakdown = None
+
+            if df_sc_breakdown is not None:
+                fig_n5 = px.bar(
+                    df_sc_breakdown,
+                    x='Scenario',
+                    y=['Mission Weight (%)', 'Expected Risk Contribution (%)'],
+                    barmode='group',
+                    title='N5 Runtime Weight vs Expected Risk',
+                    template='plotly_dark',
+                    color_discrete_sequence=['#00E5FF', '#8B5CF6']
+                )
+                fig_n5.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=350)
+                st.plotly_chart(fig_n5, use_container_width=True)
+                n5_top = df_sc_breakdown.sort_values('Expected Risk Contribution (%)', ascending=False).iloc[0]
+                st.caption(
+                    f"💡 **Key Finding**: `{n5_top['Scenario']}` represents **{n5_top['Mission Weight (%)']:.1f}% of runtime** "
+                    f"and accounts for **{n5_top['Expected Risk Contribution (%)']:.1f}% of total expected timing risk** "
+                    f"(largest contributor in the current generated data). Weights come from `activity.csv`; "
+                    f"`gc_compact_stress` has no mission weight and is excluded from N5."
+                )
+                if n5_check_note:
+                    st.caption(f"ℹ️ {n5_check_note}")
+            else:
+                st.info(
+                    "💡 **Provenance note**: Per-scenario expected-risk contributions cannot be computed because "
+                    "`activity.csv` or the per-scenario ranked-risk CSVs are unavailable. No values are shown."
+                )
 
         with col_n5_2:
             st.markdown("#### Scenario-Weighted Expected Risk Table")
@@ -830,20 +874,19 @@ with tab5:
         st.plotly_chart(fig_abl, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("### Predicted IR-Drop Map with Quantile Uncertainty Bounds")
-    
-    col_u1, col_u2 = st.columns([1, 1])
-    with col_u1:
-        st.markdown("#### Ground-Truth OpenROAD PDNSim Heatmap")
-        grid_data = df_chip_grid.values if df_chip_grid is not None else np.zeros((24, 24))
-        fig_gt = px.imshow(grid_data, color_continuous_scale='Magma', title='Ground-Truth PDNSim IR Drop (mV)')
-        fig_gt.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', height=350)
-        st.plotly_chart(fig_gt, use_container_width=True)
+    st.markdown(f"### PRISM Droop-Aware Spatial Risk Grid — {sc_raw_option}")
 
-    with col_u2:
-        st.markdown("#### Predicted IR-Drop Heatmap with 90% Confidence Interval")
-        pred_map_mean = grid_data * 0.96 + 0.4
-        fig_pred = px.imshow(pred_map_mean, color_continuous_scale='Magma', title='Predicted IR Drop Map (10th-90th Quantile Range: 31.2 - 48.6 mV)')
-        fig_pred.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', height=350)
-        st.plotly_chart(fig_pred, use_container_width=True)
-        st.caption("ℹ️ Displays point predictions alongside 10th/90th quantile prediction intervals [31.2 mV – 48.6 mV] for robust spatial risk signoff.")
+    grid_data = df_chip_grid.values if df_chip_grid is not None else np.zeros((24, 24))
+    fig_gt = px.imshow(
+        grid_data,
+        color_continuous_scale='Magma',
+        title='Spatial Timing Risk per Tile (ps)',
+        labels=dict(x="Tile X", y="Tile Y", color="Risk (ps)")
+    )
+    fig_gt.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', height=350)
+    st.plotly_chart(fig_gt, use_container_width=True)
+    st.caption(
+        "ℹ️ This is the PRISM-derived timing-risk grid (units: ps of delay penalty per 24×24 tile) for the selected scenario, "
+        "computed from predicted IR-drop. It is not a ground-truth PDNSim IR-drop map in mV. "
+        "No quantile/confidence-interval map is shown because no quantile prediction CSV is part of this dashboard."
+    )
