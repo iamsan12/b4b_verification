@@ -1,0 +1,5 @@
+sensor_id,real_x_um,real_y_um,grid_x,grid_y,marginal_risk_covered_ps,num_sensors,sensor_radius_grid_units,kernel_type
+TDET_PDET_S01,286.89,249.87,15,13,74.92,4,2.5,"exponential sensing kernel, e-folding 2.5 tiles (46 µm), cut-off at 10%"
+TDET_PDET_S02,342.42,323.91,18,17,37.47,4,2.5,"exponential sensing kernel, e-folding 2.5 tiles (46 µm), cut-off at 10%"
+TDET_PDET_S03,83.29,157.33,4,8,35.49,4,2.5,"exponential sensing kernel, e-folding 2.5 tiles (46 µm), cut-off at 10%"
+TDET_PDET_S04,120.31,83.29,6,4,20.23,4,2.5,"exponential sensing kernel, e-folding 2.5 tiles (46 µm), cut-off at 10%"

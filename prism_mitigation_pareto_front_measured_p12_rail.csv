@@ -1,0 +1,7 @@
+budget,knapsack_est_ps,verified_true_ps,chosen_fixes,at_risk_threshold_ns,at_risk_mode,at_risk_path_count,provenance
+10,3.31,3.31,Clock-skew staggering,3.8598,quantile,61,VALIDATED
+20,4.79,4.33,"Vt swap (LVT -50mV), Clock-skew staggering",3.8598,quantile,61,VALIDATED
+30,6.449999999999999,5.33,"Vt swap (LVT -50mV), Clock-skew staggering, Decap insertion",3.8598,quantile,61,VALIDATED
+40,7.550000000000001,5.99,"Vt swap (LVT -50mV), Clock-skew staggering, Strap widening",3.8598,quantile,61,VALIDATED
+50,7.73,6.08,"Clock-skew staggering, Strap widening, Decap insertion",3.8598,quantile,61,VALIDATED
+60,9.21,6.73,"Vt swap (LVT -50mV), Clock-skew staggering, Strap widening, Decap insertion",3.8598,quantile,61,VALIDATED

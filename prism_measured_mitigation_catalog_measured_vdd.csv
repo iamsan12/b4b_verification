@@ -1,0 +1,8 @@
+name,cost,reduction_pct,benefit_ps,mean_benefit_ps_per_path,max_benefit_ps_per_path,total_benefit_ps,n_paths_evaluated,at_risk_paths_with_negative_effective_slack,assumption_source,at_risk_threshold_ns,at_risk_mode,at_risk_path_count,provenance
+Decap insertion,15,0.15,7.35,0.12,0.26,7.35,63,0,assumed_whatif,3.8593,quantile,63,VALIDATED
+Strap widening,25,0.25,12.24,0.19,0.43,12.24,63,0,assumed_whatif,3.8593,quantile,63,VALIDATED
+Cell de-densification,30,0.2,9.79,0.16,0.35,9.79,63,0,assumed_whatif,3.8593,quantile,63,VALIDATED
+Clock-skew staggering,10,0.3,14.68,0.23,0.52,14.68,63,0,assumed_whatif,3.8593,quantile,63,VALIDATED
+Vt swap (LVT -50mV),5,0.1335,6.54,0.1,0.23,6.54,63,0,assumed_vth_swap,3.8593,quantile,63,VALIDATED
+Extra bump/pad,40,0.35,17.12,0.27,0.6,17.12,63,0,assumed_whatif,3.8593,quantile,63,VALIDATED
+Measured: strap pitch 12 µm,20,0.0,37.5,0.6,1.32,37.5,63,0,roleA_measured_pnr,3.8593,quantile,63,VALIDATED

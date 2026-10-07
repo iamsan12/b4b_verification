@@ -1,0 +1,14 @@
+{
+  "status": "PASSED",
+  "audit_passed": true,
+  "partition_audit_text": "Partition audit: 3/3 checks passed \u2014 each design in exactly one partition; train 8 / calib 3 / holdout 3 designs; no design shared across partitions.",
+  "message": "Partition audit: 3/3 checks passed \u2014 each design in exactly one partition; train 8 / calib 3 / holdout 3 designs; no design shared across partitions.",
+  "checks": {
+    "design_split_disjoint": true,
+    "spatial_tile_ids_valid": true,
+    "voltage_units_in_volts": true,
+    "positive_path_delays": true,
+    "dse_knobs_valid": true
+  },
+  "timestamp": "2026-10-08T00:54:11.977949"
+}

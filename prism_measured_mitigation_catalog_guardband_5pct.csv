@@ -1,0 +1,7 @@
+name,cost,reduction_pct,benefit_ps,mean_benefit_ps_per_path,max_benefit_ps_per_path,total_benefit_ps,n_paths_evaluated,at_risk_paths_with_negative_effective_slack,assumption_source,at_risk_threshold_ns,at_risk_mode,at_risk_path_count,provenance
+Decap insertion,15,0.15,634.55,9.91,20.11,634.55,64,0,assumed_whatif,3.7967,quantile,64,VALIDATED
+Strap widening,25,0.25,1044.36,16.32,33.28,1044.36,64,0,assumed_whatif,3.7967,quantile,64,VALIDATED
+Cell de-densification,30,0.2,840.17,13.13,26.72,840.17,64,0,assumed_whatif,3.7967,quantile,64,VALIDATED
+Clock-skew staggering,10,0.3,1247.13,19.49,39.8,1247.13,64,0,assumed_whatif,3.7967,quantile,64,VALIDATED
+Vt swap (LVT -50mV),5,0.1335,566.37,8.85,17.92,566.37,64,0,assumed_vth_swap,3.7967,quantile,64,VALIDATED
+Extra bump/pad,40,0.35,1448.48,22.63,46.27,1448.48,64,0,assumed_whatif,3.7967,quantile,64,VALIDATED

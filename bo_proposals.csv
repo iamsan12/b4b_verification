@@ -1,0 +1,5 @@
+rank,proposal_id,config_base,NUM_CH,DATA_W,ECC_LANES,CLK_GATE_EN,PDN_STRAP_PITCH_UM,executed_strap_pitch_um,is_platform_pdn,ir_drop_worst_mv,vss_worst_mv,rail_worst_sum_mv,rank_vdd_only,rank_vdd_vss_rail,bo_score,rank_swap_note,method,legacy_bo_rank
+1,cfg_run_01,cfg_small,2,32,1,1,12,12,0,0.3051,0.258,0.5631,1,1,0.3051,,heuristic_ranking_over_measured_runs,1
+2,cfg_run_04,cfg_small,2,32,1,1,16,16,0,0.3758,0.3466,0.7224,2,2,0.3758,,heuristic_ranking_over_measured_runs,4
+3,cfg_run_03,cfg_small,2,32,4,1,24,24,0,0.6859,0.7566,1.4426,3,4,0.6859,"Rank 3 VDD-only (0.6859 mV), but Rank 4 VDD+VSS Rail (1.4426 mV) due to ground bounce",heuristic_ranking_over_measured_runs,3
+4,cfg_run_02,cfg_small,2,32,1,1,24,24,0,0.7112,0.6724,1.3837,4,3,0.7112,"Rank 4 VDD-only (0.7112 mV), but Rank 3 VDD+VSS Rail (1.3837 mV)",heuristic_ranking_over_measured_runs,2

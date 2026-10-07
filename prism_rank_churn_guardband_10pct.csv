@@ -1,0 +1,2 @@
+n_paths,n_rank_changes,max_rank_shift,spearman_correlation,n_discordant_pairs,n_paths_moved_across_tie_groups,kendall_tau_b,n_tied_nominal_pairs,top_10_shifted_endpoints
+1601,1141,372,0.9931,13635,525,0.9739,25785,nand_dq_o[14](372);nand_ce_n[1](372);nand_we_n[0](372);nand_dq_o[9](372);nand_ale[1](372);nand_dq_o[2](372);nand_ale[0](372);nand_dq_oe[1](372);nand_we_n[1](372);nand_cle[1](372)

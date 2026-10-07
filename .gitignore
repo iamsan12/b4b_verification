@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.streamlit/secrets.toml
+*.log
+.DS_Store
+*.zip
+RoleA's handoff/
+before_final/
+before_final_rolea/
+b4b_verification/
+PRISM_RoleC_Submission/
+new_files_extracted/
+orfs_extracted/
+round2_extracted/
+round3_extracted/
+final_psm/
+heatmaps/
+scratch/

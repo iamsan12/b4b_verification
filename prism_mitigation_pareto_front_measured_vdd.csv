@@ -1,0 +1,7 @@
+budget,knapsack_est_ps,verified_true_ps,chosen_fixes,at_risk_threshold_ns,at_risk_mode,at_risk_path_count,provenance
+10,14.68,14.68,Clock-skew staggering,3.8593,quantile,63,VALIDATED
+20,37.5,37.5,Measured: strap pitch 12 µm,3.8593,quantile,63,VALIDATED
+30,52.18,40.93,"Measured: strap pitch 12 µm, Clock-skew staggering",3.8593,quantile,63,VALIDATED
+40,58.72,41.99,"Measured: strap pitch 12 µm, Vt swap (LVT -50mV), Clock-skew staggering",3.8593,quantile,63,VALIDATED
+50,66.07,43.02,"Measured: strap pitch 12 µm, Vt swap (LVT -50mV), Clock-skew staggering, Decap insertion",3.8593,quantile,63,VALIDATED
+60,70.96000000000001,43.7,"Measured: strap pitch 12 µm, Vt swap (LVT -50mV), Clock-skew staggering, Strap widening",3.8593,quantile,63,VALIDATED

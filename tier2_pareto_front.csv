@@ -1,0 +1,4 @@
+config,run_id,NUM_CH,DATA_W,ECC_LANES,CLK_GATE_EN,pdn_strap_pitch_um,peak_v_drop_mv,ir_drop_worst_mv,vss_worst_mv,rail_worst_sum_mv,power_mw,die_area_um2,setup_tns_ns,hold_ws_ns,pareto_status,hypervolume_stat,power_note
+cfg_run_01,ssd_ctrl_cfg_run_01_p12,2,32,1,1,12,0.3051,0.3051,0.258,0.5631,17.1476,197331.0,0.0,0.00876,non_dominated,0.4825,"Power differs by <0.2% between cfg_small variants (17.12 to 17.15 mW), within run-to-run noise."
+cfg_run_03,ssd_ctrl_cfg_run_03_p24,2,32,4,1,24,0.6859,0.6859,0.7566,1.4426,17.1169,197323.0,0.0,0.00195,non_dominated,0.4825,"Power differs by <0.2% between cfg_small variants (17.12 to 17.15 mW), within run-to-run noise."
+cfg_run_04,ssd_ctrl_cfg_run_04_p16,2,32,1,1,16,0.3758,0.3758,0.3466,0.7224,17.1398,197331.0,0.0,0.01247,non_dominated,0.4825,"Power differs by <0.2% between cfg_small variants (17.12 to 17.15 mW), within run-to-run noise."
